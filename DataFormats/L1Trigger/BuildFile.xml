@@ -2,6 +2,7 @@
 <use   name="DataFormats/Common"/>
 <use   name="DataFormats/L1GlobalMuonTrigger"/>
 <use   name="DataFormats/HcalDetId"/>
+<use   name="root"/>
 
 <export>
   <lib   name="1"/>

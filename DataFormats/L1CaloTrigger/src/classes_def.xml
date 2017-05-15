@@ -6,8 +6,12 @@
    <version ClassVersion="11" checksum="3966998228"/>
    <version ClassVersion="10" checksum="2412488094"/>
   </class>
+  <class name="L1PFObject" ClassVersion="0">
+   <version ClassVersion="1" checksum="1146444428"/>
+  </class>
   <class name="L1CaloCluster" ClassVersion="0">
-   <version ClassVersion="0" checksum="931443009"/>
+   <version ClassVersion="0" checksum="2818898748"/>
+   <version ClassVersion="-1" checksum="1989736432"/>
   </class>
   <class name="L1CaloRegion" ClassVersion="10">
    <version ClassVersion="10" checksum="2354390681"/>

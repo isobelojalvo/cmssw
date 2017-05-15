@@ -32,10 +32,12 @@
 #include "DataFormats/L1Trigger/interface/L1DataEmulResult.h"
 #include "DataFormats/L1Trigger/interface/HOTwinMuxDigiCollection.h"
 #include "DataFormats/L1Trigger/interface/HOTPDigiTwinMux.h"
-
+#include "DataFormats/L1Trigger/interface/L1PFTau.h"
 
 namespace DataFormats_L1Trigger {
   struct dictionary {
+    L1PFTau l1pftau;
+    edm::Wrapper<L1PFTauCollection> w_l1pftau;
 
     l1t::L1CandidateBxCollection l1CandidateBxColl;
     l1t::EGammaBxCollection eGammaBxColl;
