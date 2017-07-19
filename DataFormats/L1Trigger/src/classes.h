@@ -108,9 +108,11 @@ namespace DataFormats_L1Trigger {
     l1t::TauRef   refTau_;
     l1t::TauRefVector   refVecTau_;
     l1t::TauVectorRef   vecRefTau_;
+    std::vector<L1PFTau> vecRefPFTau_;
     edm::Wrapper<l1t::TauRef>   w_refTau_;
     edm::Wrapper<l1t::TauRefVector>   w_refVecTau_;
     edm::Wrapper<l1t::TauVectorRef>   w_vecRefTau_;
+    edm::Wrapper<L1PFTauCollection> w_vecRefPFTau_;
 
     //l1t::CaloSpareRef   refCaloSpare_;
     //l1t::CaloSpareRefVector   refVecCaloSpare_;

@@ -22,8 +22,6 @@ public:
   /// default constructor
   L1CaloCluster();
 
-
-  
   /// destructor
   ~L1CaloCluster();
 
@@ -39,10 +37,18 @@ public:
   unsigned et() const { return (m_et); }
   unsigned towerEta() const{ return (m_towerEta); }
   unsigned towerPhi() const{ return (m_towerPhi); }
+  unsigned crystalEta() const{ return (m_crystalEta); }
+  unsigned crystalPhi() const{ return (m_crystalPhi); }
+
+  //only initialized for neutral clusters
   bool isPhoton()  const{ return (m_isPhoton); }
+  bool isPi0()  const{ return (m_isPi0); }
   bool isNeutralHadron()  const{ return (m_isNeutralHadron); }
 
-  void setEt(unsigned inputEt) { m_et = inputEt;}
+  void setEt(unsigned inputEt) { 
+    m_et = inputEt; 
+    m_p4.SetPtEtaPhiE(inputEt,m_p4.Eta(),m_p4.Phi(),inputEt);}
+
   void setEt(float inputEt) { 
     if(inputEt>200)
       inputEt = 200;
@@ -53,18 +59,23 @@ public:
     m_data = m_data|(uInputEt&0x7FF);
   }
 
+  void setCrystalEta(unsigned inputEta ) { 
+    m_crystalEta = inputEta;
+  }
+
+  void setCrystalPhi(unsigned inputPhi ) { 
+    m_crystalPhi = inputPhi;
+  }
+
   void setTowerEta(unsigned inputEta ) { 
     (m_towerEta = inputEta); 
     m_data = m_data&0xFFF807FF;//first clear eta values
     m_data = m_data|((inputEta&0x7F)<<11);
-
   }
   void setTowerEtaSide(unsigned inputEtaSide ) { 
-
     (m_towerEtaSide = inputEtaSide); 
     m_data = m_data&0xFFF7FFFF;//first clear eta sign value
-    m_data = m_data|((inputEtaSide&0x1)<<19);
-    
+    m_data = m_data|((inputEtaSide&0x1)<<19);    
 }
   void setTowerPhi(unsigned inputPhi ) { 
     (m_towerPhi = inputPhi); 
@@ -92,8 +103,8 @@ public:
   void setEcalEnergy(float input){ m_ecalEnergy = input;};
   void setHcalEnergy(float input){ m_hcalEnergy = input;};
   void setIsPhoton(bool input){ m_isPhoton = input;};
+  void setIsPi0(bool input){ m_isPi0 = input;};
   void setIsNeutralHadron(bool input){ m_isNeutralHadron = input;};
-
 
   /// is there any information in the candidate
   bool empty() const { return (m_data == 0); }
@@ -109,6 +120,8 @@ public:
   float m_ecalEnergy;
   float m_hcalEnergy;
 
+  int m_crystalEta;
+  int m_crystalPhi;
   unsigned m_towerEta;
   unsigned m_towerEtaSide;
   unsigned m_towerPhi;
@@ -118,6 +131,7 @@ public:
   unsigned m_EoH;
   unsigned m_HoE;
   bool m_isPhoton;
+  bool m_isPi0;
   bool m_isNeutralHadron;
 
 };

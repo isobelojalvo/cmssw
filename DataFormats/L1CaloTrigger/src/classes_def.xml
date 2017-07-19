@@ -10,7 +10,9 @@
    <version ClassVersion="1" checksum="1146444428"/>
   </class>
   <class name="L1CaloCluster" ClassVersion="0">
-   <version ClassVersion="0" checksum="2818898748"/>
+   <version ClassVersion="0" checksum="1416450982"/>
+   <version ClassVersion="1" checksum="1416450982"/>
+   <version ClassVersion="0" checksum="4268887629"/>
    <version ClassVersion="-1" checksum="1989736432"/>
   </class>
   <class name="L1CaloRegion" ClassVersion="10">
