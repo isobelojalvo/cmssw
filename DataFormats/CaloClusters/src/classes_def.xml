@@ -1,0 +1,12 @@
+<!-- *********************************** -->
+<!--Stacked Tracker Simulations          -->
+<!-- *********************************** -->
+
+<lcgdict>
+
+  <class name="L1CaloCluster" />
+  <class name="std::vector<L1CaloCluster>" />
+  <class name="edm::Wrapper<std::vector<L1CaloCluster> >" />
+
+</lcgdict>
+
