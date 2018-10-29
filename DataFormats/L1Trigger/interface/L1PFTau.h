@@ -54,8 +54,28 @@ namespace l1t {
     void setEoH(unsigned inputEoH) {(m_EoH = inputEoH);}
     void setHoE(float inputHoE){m_HoE = inputHoE;};  
 
+    void setPassTightIso(bool input)  {m_passTightIso  = input;};
+    void setPassMediumIso(bool input) {m_passMediumIso = input;};
+    void setPassLooseIso(bool input)  {m_passLooseIso  = input;};
+    void setPassVLooseIso(bool input) {m_passVLooseIso = input;};
+
+    void setPassTightRelIso(bool input)  {m_passTightRelIso  = input;};
+    void setPassMediumRelIso(bool input) {m_passMediumRelIso = input;};
+    void setPassLooseRelIso(bool input)  {m_passLooseRelIso  = input;};
+    void setPassVLooseRelIso(bool input) {m_passVLooseRelIso = input;};
+
     /// set data
     void setRawData(uint32_t data) { m_data = data; }
+
+    bool passTightIso()  const{return m_passTightIso;};
+    bool passMediumIso() const{return m_passMediumIso;};
+    bool passLooseIso()  const{return m_passLooseIso;};
+    bool passVLooseIso() const{return m_passVLooseIso;};
+
+    bool passTightRelIso()  const{return m_passTightRelIso;};
+    bool passMediumRelIso() const{return m_passMediumRelIso;};
+    bool passLooseRelIso()  const{return m_passLooseRelIso;};
+    bool passVLooseRelIso() const{return m_passVLooseRelIso;};
 
     // reco level quantities to be set manually, temporary aid for algo development
     //LorentzVector p4() const {return m_p4;};
@@ -128,6 +148,15 @@ namespace l1t {
     float m_chargedIsolation;
     float m_neutralIsolation;
 
+    bool m_passTightIso;
+    bool m_passMediumIso;
+    bool m_passLooseIso;
+    bool m_passVLooseIso;
+
+    bool m_passTightRelIso;
+    bool m_passMediumRelIso;
+    bool m_passLooseRelIso;
+    bool m_passVLooseRelIso;
 
     TTTrack< Ref_Phase2TrackerDigi_ > m_trackRef;
   };

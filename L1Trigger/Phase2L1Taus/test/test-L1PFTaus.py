@@ -86,6 +86,11 @@ process.VertexProducer.l1TracksInputTag = cms.InputTag("TTTracksFromTracklet", "
 
 # Path and EndPath definitions
 process.L1simulation_step = cms.Path(process.SimL1Emulator)
+#process.out = cms.OutputModule("PoolOutputModule",
+#    fileName = cms.untracked.string("fullDump.root"),
+#    outputCommands = cms.untracked.vstring('keep *') #'keep *_*_*_L1TCaloSummaryTest')
+#)
+#process.endjob_step = cms.EndPath(process.out)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
 process.load("L1Trigger.Phase2L1ParticleFlow.pfTracksFromL1Tracks_cfi")
@@ -97,7 +102,7 @@ process.l1pf = cms.Path(process.pfTracksFromL1Tracks+process.l1ParticleFlow)
 # L1 Tau object
 ############################################################
 
-process.load("L1Trigger.Phase2L1Taus.L1PFTauProducer_grow_l1t_cff")
+process.load("L1Trigger.Phase2L1Taus.L1PFTauProducer_cff")
 process.L1PFTauProducer.debug = cms.untracked.bool(True)
 process.L1PFTauProducer.L1PFObjects = cms.InputTag("l1pfProducer","PF")
 process.L1PFTauProducer.L1Neutrals = cms.InputTag("l1pfProducer")
@@ -117,3 +122,8 @@ process = customiseEarlyDelete(process)
 
 #dump_file = open('dump.py','w')
 #dump_file.write(process.dumpPython())
+
+process.out = cms.OutputModule("PoolOutputModule",
+    fileName = cms.untracked.string("fullDump.root"),
+    outputCommands = cms.untracked.vstring('keep *') #'keep *_*_*_L1TCaloSummaryTest')
+)

@@ -186,13 +186,13 @@ void TauMapper::process(){
 
     l1PFTau.setP4(tempP4);
 
-    l1PFTau.setChargedIso(sumChargedIso+prong2.pt());
+    l1PFTau.setChargedIso(sumChargedIso + prong2.pt() + strip_pt );
 
     l1PFTau.setTauType(0);    
   }
 
   // 1 prong pi0
-  if(prong3.pt() == 0 && strip_pt != 0 ){
+  if(prong3.pt() == 0 && strip_pt > 0 ){
     float pt = seedCH.pt() + strip_pt;
     float eta = (seedCH.eta() + strip_eta)/2;
     float phi = seedCH.phi();
@@ -204,7 +204,33 @@ void TauMapper::process(){
 
     l1PFTau.setTauType(1);    
   }
-
+  
+  if(l1PFTau.chargedIso() < 50){
+    l1PFTau.setPassVLooseIso(true);
+  }
+  if(l1PFTau.chargedIso() < 20){
+    l1PFTau.setPassLooseIso(true);
+  }
+  if(l1PFTau.chargedIso() < 10){
+    l1PFTau.setPassMediumIso(true);
+  }
+  if(l1PFTau.chargedIso() < 5){
+    l1PFTau.setPassTightIso(true);
+  }
+  /*
+  if(l1PFTau.chargedIso()/l1PFTau.p4().pt() < 0.5){
+    l1PFTau.setPassVLooseRelIso(true);
+  }
+  if(l1PFTau.chargedIso()/l1PFTau.p4().pt() < 0.2){
+    l1PFTau.setPassLooseRelIso(true);
+  }
+  if(l1PFTau.chargedIso()/l1PFTau.p4().pt() < 0.15){
+    l1PFTau.setPassMediumRelIso(true);
+  }
+  if(l1PFTau.chargedIso()/l1PFTau.p4().pt() < 0.1){
+    l1PFTau.setPassTightRelIso(true);
+  }
+  */
 }
 
 void TauMapper::process_strip(){
@@ -275,5 +301,5 @@ float TauMapper::weighted_avg_eta(simple_object_t cluster_1, simple_object_t clu
 }
 
 
-TauMapper::TauMapper() {};
+TauMapper::TauMapper():m_minpi0pt(0) {};
 TauMapper::~TauMapper() {};
