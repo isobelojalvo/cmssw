@@ -60,6 +60,9 @@ void L1PFTauProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   // loop through PF Candidates and add PF Cands to each Tau
   for(auto pfChargedHadron : pfChargedHadrons){
+    if(pfChargedHadron.pt()==0 )
+      continue;
+
     for(auto &tauCandidate : tauCandidates){
       if(tauCandidate.addPFChargedHadron(pfChargedHadron)){
 	break;

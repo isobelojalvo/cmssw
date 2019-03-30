@@ -15,17 +15,11 @@
   <class name="edm::Wrapper<l1t::PFTrackCollection>" />
   <class name="edm::Ref<l1t::PFTrackCollection>" />
 
-  <class name="l1t::PFCandidate"  ClassVersion="3">
-        <version ClassVersion="3" checksum="4253860178"/>
+  <class name="l1t::PFCandidate"  ClassVersion="4">
+        <version ClassVersion="4" checksum="3264316825"/>
   </class>
   <class name="l1t::PFCandidateCollection" />
   <class name="edm::Wrapper<l1t::PFCandidateCollection>" />
-
-  <class name="l1t::PFJet"  ClassVersion="3">
-        <version ClassVersion="3" checksum="133342988"/>
-  </class>
-  <class name="l1t::PFJetCollection" />
-  <class name="edm::Wrapper<l1t::PFJetCollection>" />
 
 
 </lcgdict>

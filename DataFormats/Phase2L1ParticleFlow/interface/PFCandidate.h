@@ -18,6 +18,7 @@ namespace l1t
           PFCandidate() {}
           PFCandidate(Kind kind, int charge, const LorentzVector & p, float puppiWeight=-1, int hwpt=0, int hweta=0, int hwphi=0) :
                 PFCandidate(kind, charge, PolarLorentzVector(p), puppiWeight, hwpt, hweta, hwphi) {}
+
           PFCandidate(Kind kind, int charge, const PolarLorentzVector & p, float puppiWeight=-1, int hwpt=0, int hweta=0, int hwphi=0) ; 
 
           Kind id() const { return Kind(hwQual()); }
@@ -30,15 +31,19 @@ namespace l1t
 
           const MuonRef & muon() const { return muonRef_; }
           void setMuon(const MuonRef & ref) { muonRef_ = ref; }
+	  
+	  void setTime(const float time){ mtdTime_ = time; }
 
           /// PUPPI weight (-1 if not available)
           float puppiWeight() const { return puppiWeight_; }
 
+	  float time() const{return mtdTime_;}
       private:
           PFClusterRef clusterRef_;
           PFTrackRef trackRef_;
           MuonRef muonRef_;
           float puppiWeight_;
+	  float mtdTime_;
 
           void setPdgIdFromKind_(int charge, Kind kind);
   };

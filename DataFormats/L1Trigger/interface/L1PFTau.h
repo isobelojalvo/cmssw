@@ -9,7 +9,7 @@
 //#include <TLorentzVector.h>
 #include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "DataFormats/L1Trigger/interface/BXVector.h"
-
+#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidate.h"
 
 namespace l1t {
 
@@ -51,7 +51,8 @@ namespace l1t {
     int towerEtaSide() const{ return (m_towerEtaSide); }
     unsigned towerEta() const{ return (m_towerEta); }
     unsigned towerPhi() const{ return (m_towerPhi); }
-    TTTrack< Ref_Phase2TrackerDigi_ > trackRef() const{return (m_trackRef);}
+    std::vector<l1t::PFCandidate > pfRef() const{return (m_pfRef);}
+    std::vector<l1t::PFCandidate > egPFRef() const{return (m_egPFRef);}
     
     void setEt(unsigned inputEt) { m_et = inputEt;}
     void setTowerEta(unsigned inputEta ) { (m_towerEta = inputEta); }
@@ -96,6 +97,7 @@ namespace l1t {
     float rawIso() const{return m_rawIsolation;}
     float chargedIso() const{return m_chargedIsolation;}
     float neutralIso() const{return m_neutralIsolation;}
+    float time() const{return m_time;}
     int tauType()const{return m_tauType;}
     int tauIsoQuality()const{return m_tauIsoQual;}
     int tauRelIsoQuality()const{return m_tauIsoQual;}
@@ -105,13 +107,15 @@ namespace l1t {
     void setEcalEnergy(float input){ m_ecalEnergy = input;};
     void setHcalEnergy(float input){ m_hcalEnergy = input;};
     void setCaloEnergy(float input){ m_caloEnergy = input;};
-    void setTrackRef(TTTrack< Ref_Phase2TrackerDigi_ > trackRef){m_trackRef = trackRef;};
+    void setPFRef(l1t::PFCandidate pfRef){m_pfRef.push_back(pfRef);};
+    void setEGPFRef(l1t::PFCandidate egPFRef){m_egPFRef.push_back(egPFRef);};
     void setRelIso(float inputIso){m_relativeIsolation = inputIso;};
 
     void setTauType(float input){ m_tauType = input;};
     void setRawIso(float inputIso){m_rawIsolation = inputIso;};
     void setChargedIso(float inputIso){m_chargedIsolation = inputIso;};
     void setNeutralIso(float inputIso){m_neutralIsolation = inputIso;};
+    void setTime(float inputTime){m_time = inputTime;};
 
     void setHWPhi(float inputPhi){
       m_hwPhi = round(inputPhi/0.0174)*0.0174;};
@@ -157,6 +161,7 @@ namespace l1t {
     float m_rawIsolation;
     float m_chargedIsolation;
     float m_neutralIsolation;
+    float m_time;
 
     bool m_passTightIso;
     bool m_passMediumIso;
@@ -168,7 +173,8 @@ namespace l1t {
     bool m_passLooseRelIso;
     bool m_passVLooseRelIso;
 
-    TTTrack< Ref_Phase2TrackerDigi_ > m_trackRef;
+    std::vector<l1t::PFCandidate > m_pfRef;
+    std::vector<l1t::PFCandidate > m_egPFRef;
   };
 
 };

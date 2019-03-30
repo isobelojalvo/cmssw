@@ -143,7 +143,9 @@ bool TauMapper::addEG( l1t::PFCandidate in ){
       float temp_in_phi = round_to_tower(in.phi());
       if(temp_in_eta == egGrid[i][j].eta &&
 	 temp_in_phi == egGrid[i][j].phi ){
+	
 	egGrid[i][j].et += in.et();
+	l1PFTau.setEGPFRef(in);
 	return true;
       }
     }
@@ -156,7 +158,7 @@ void TauMapper::process(){
 
   process_strip();
 
-  //std::cout<<"seedCH pt: "<< seedCH.pt()<<" eta: "<< seedCH.eta() <<" phi: "<<seedCH.phi()<<std::endl;
+  //std::cout<<"seedCH pt: "<< seedCH.pt()<<" eta: "<< seedCH.eta() <<" phi: "<<seedCH.phi()<< " time: "<< seedCH.time()<<std::endl;
   //std::cout<<"   prong2 pt: "<< prong2.pt()<<" eta: "<< prong2.eta() <<" phi: "<<prong2.phi()<<std::endl;
   //std::cout<<"   prong3 pt: "<< prong3.pt()<<" eta: "<< prong3.eta() <<" phi: "<<prong3.phi()<<std::endl;
   //std::cout<<"   strip  pt: "<< strip_pt <<" eta: "<< strip_eta <<std::endl;
@@ -177,6 +179,9 @@ void TauMapper::process(){
 
     l1PFTau.setChargedIso(sumChargedIso);
     l1PFTau.setTauType(10);    
+
+    l1PFTau.setPFRef(prong2);
+    l1PFTau.setPFRef(prong3);
   }
 
   //1 prong
@@ -191,6 +196,7 @@ void TauMapper::process(){
     l1PFTau.setChargedIso(sumChargedIso + prong2.pt() + strip_pt);
 
     l1PFTau.setTauType(0);    
+
   }
 
   // 1 prong pi0
@@ -206,6 +212,9 @@ void TauMapper::process(){
 
     l1PFTau.setTauType(1);    
   }
+
+  l1PFTau.setTime(seedCH.time());
+  l1PFTau.setPFRef(seedCH);
   
   if(l1PFTau.chargedIso() < 50){
     l1PFTau.setPassVLooseIso(true);
