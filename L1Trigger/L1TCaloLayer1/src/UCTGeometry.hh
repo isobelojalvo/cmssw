@@ -68,14 +68,7 @@ namespace l1tcalo {
   constexpr uint32_t CaloVHFRegionStart{12};
 
   constexpr uint32_t MaxUCTRegionsPhi{MaxCaloPhi / NPhiInRegion};
-  constexpr uint32_t MaxUCTRegionsEta{2 * (NRegionsInCard + NHFRegionsInCard)};
-
-  // Binning for Layer1 calibration LUTs
-  const uint32_t nEtBins = 256;
-  const uint32_t nCalEtaBins = 28;
-  const uint32_t nCalSideBins = 2;
-  const uint32_t nHfEtaBins = 12;
-
+  constexpr uint32_t MaxUCTRegionsEta{NRegionsInCard + NHFRegionsInCard}; // Labelled -MaxUCTRegionsEta to +MaxUCTRegionsEta skipping 0
 }
 
 typedef std::pair<int, uint32_t> UCTRegionIndex;
@@ -86,7 +79,7 @@ class UCTGeometry {
 public:
 
   UCTGeometry();
-  ~UCTGeometry() = default;
+  ~UCTGeometry() {;}
 
   // Calorimeter indices are defined to be ints and do not count from zero
   // Eta index sign indicates negative or positive eta
@@ -110,6 +103,7 @@ public:
   uint32_t getRegion(int caloEta,int caloPhi);
   uint32_t getiEta(int caloEta);
   uint32_t getiPhi(int caloPhi);
+  bool getNegativeSide(int caloEta) {return (caloEta < 0);}
 
   bool checkCrate(uint32_t crate) {return !(crate < l1tcalo::NCrates);}
   bool checkCard(uint32_t card) {return !(card < l1tcalo::NCardsInCrate);}
@@ -128,9 +122,6 @@ public:
   //  UCTRegionPhiIndices are 0-17
   //  UCTRegionEtaIndices are 1-7 for EB/HB+EE/HE and 8-13 for HF, 
   //   with negative values for negative eta, and zero being illegal
-  //  GCTRegionPhiIndices are the same
-  //  GCTRegionEtaIndices are 4-10 for -7 thru -1 and 11-17 for 1 thru 7
-  //  GCTRegionEtaIndices 0-3 are for -HF and 18-22 are for +HF, which are now unused!
   // We label by the pair (UCTRegionPhiIndex, UCTRegionEtaIndex)
 
   uint32_t getUCTRegionPhiIndex(int caloPhi) {
@@ -138,8 +129,6 @@ public:
     else if(caloPhi < 73) return 0;
     else return 0xDEADBEEF;
   }
-  uint32_t getGCTRegionPhiIndex(int caloPhi) {return getUCTRegionPhiIndex(caloPhi);}
-  uint32_t getGCTRegionPhiIndex(UCTRegionIndex r) {return r.second;}
 
   int getUCTRegionEtaIndex(int caloEta) {
     // Region index is same for all phi; so get for phi = 1
@@ -147,30 +136,10 @@ public:
     if(caloEta < 0) return -(rgn+1);
     return (rgn+1);
   }
-  uint32_t getGCTRegionEtaIndex(int caloEta) {
-    uint32_t gctEta = 0xDEADBEEF;
-    // Region index is same for all phi; so get for phi = 1
-    uint32_t region = getRegion(caloEta, 1);
-    if(caloEta > 0 && region < l1tcalo::NRegionsInCard)
-      gctEta = region + 11;
-    else if(caloEta < 0 && region < l1tcalo::NRegionsInCard)
-      gctEta = 10 - region;
-    return gctEta;
-  }
-  uint32_t getGCTRegionEtaIndex(UCTRegionIndex r) {
-    uint32_t gctEta = 0xDEADBEEF;
-    uint32_t region = std::abs(r.first)-1;
-    if(r.first > 0 && region < l1tcalo::NRegionsInCard)
-      gctEta = region + 11;
-    else if(r.first < 0 && region < l1tcalo::NRegionsInCard)
-      gctEta = 10 - region;
-    return gctEta;
-  }
 
   uint32_t getUCTRegionPhiIndex(uint32_t crate, uint32_t card);
 
   int getUCTRegionEtaIndex(bool negativeSide, uint32_t region) {
-    if(!checkRegion(region)) return 0xDEADBEEF;
     if(negativeSide) return -(region + 1);
     else return (region + 1);
   }
@@ -185,10 +154,14 @@ public:
 
   UCTTowerIndex getUCTTowerIndex(UCTRegionIndex r, uint32_t iEta = 0, uint32_t iPhi = 0);
 
+  UCTRegionIndex getUCTRegionIndexFromL1CaloRegion(uint32_t caloRegionEta, uint32_t caloRegionPhi);
+  UCTTowerIndex getUCTTowerIndexFromL1CaloRegion(UCTRegionIndex r, uint32_t rawData);
+
   double getUCTTowerEta(int caloEta);
   double getUCTTowerPhi(int caloPhi);
 
 private:
+  double twrEtaValues[29];
 };
 
 #endif

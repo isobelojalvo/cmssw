@@ -1,32 +1,31 @@
 #include <iostream>
-#include <cstdlib>
-#include <cstdint>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "UCTCrate.hh"
 #include "UCTCard.hh"
 #include "UCTGeometry.hh"
 #include "UCTLogging.hh"
 
-UCTCrate::UCTCrate(uint32_t crt, int fwv) :
+UCTCrate::UCTCrate(uint32_t crt, UCTParameters *parameters) :
   crate(crt),
-  crateSummary(0), 
-  fwVersion(fwv) {
+  crateSummary(0) {
   UCTGeometry g;
   for(uint32_t card = 0; card < g.getNCards(); card++) {
-    cards.push_back(new UCTCard(crate, card, fwVersion));
+    cards.push_back(new UCTCard(crate, card, parameters));
   }
 }
 
 UCTCrate::~UCTCrate() {
   for(uint32_t i = 0; i < cards.size(); i++) {
-    if(cards[i] != nullptr) delete cards[i];
+    if(cards[i] != 0) delete cards[i];
   }
 }
 
 bool UCTCrate::process() {
   crateSummary = 0;
   for(uint32_t i = 0; i < cards.size(); i++) {
-    if(cards[i] != nullptr) {
+    if(cards[i] != 0) {
       cards[i]->process();
       crateSummary += cards[i]->et();
     }

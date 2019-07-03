@@ -2,9 +2,9 @@
 #include <iomanip>
 #include <string>
 #include <vector>
-#include <cmath>
-#include <cstdlib>
-#include <cstdint>
+#include <math.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "UCTTower.hh"
 #include "UCTLogging.hh"
@@ -20,7 +20,7 @@ bool UCTTower::process() {
   uint32_t calibratedECALET = ecalET;
   uint32_t logECALET = (uint32_t) log2((double) ecalET);
   if(logECALET > erMaxV) logECALET = erMaxV;
-  if(ecalLUT != nullptr) {
+  if(ecalLUT != 0) {
     uint32_t etaAddress = region * NEtaInRegion + iEta;
     uint32_t fbAddress = 0;
     if(ecalFG) fbAddress = 1;
@@ -31,7 +31,7 @@ bool UCTTower::process() {
   uint32_t calibratedHCALET = hcalET;
   uint32_t logHCALET = (uint32_t) log2((double) hcalET);
   if(logHCALET > erMaxV) logHCALET = erMaxV;
-  if(hcalLUT != nullptr) {
+  if(hcalLUT != 0) {
     uint32_t etaAddress = region * NEtaInRegion + iEta;
     uint32_t fbAddress = 0;
     if((hcalFB & 0x1) != 0) fbAddress = 1;
@@ -39,20 +39,14 @@ bool UCTTower::process() {
     calibratedHCALET = value & etInputMax;
     logHCALET = (value & 0x7000) >> 12;
   }
-
-  // Saturation codes implemented in fwVersion 1
-  if(fwVersion >= 1) {
-    if(calibratedECALET==0xFF && calibratedHCALET==0xFF)
-      towerData = 0x1FF;
-    else if(calibratedECALET==0xFF)
-      towerData = 0x1FE;
-    else if(calibratedHCALET==0xFF)
-      towerData = 0x1FD;
-    else
-      towerData = calibratedECALET + calibratedHCALET;
-  } else {
+  if(calibratedECALET==0xFF && calibratedHCALET==0xFF)
+    towerData = 0x1FF;
+  else if(calibratedECALET==0xFF)
+    towerData = 0x1FE;
+  else if(calibratedHCALET==0xFF)
+    towerData = 0x1FD;
+  else
     towerData = calibratedECALET + calibratedHCALET;
-  }
 
   if(towerData > etMask) towerData = etMask;
   uint32_t er = 0;
@@ -90,37 +84,23 @@ bool UCTTower::process() {
 }
 
 bool UCTTower::processHFTower() {
-  if ( fwVersion > 2 ) {
-    uint32_t calibratedET = hcalET;
-    if(hfLUT != nullptr) {
-      uint32_t etaAddress = (region - NRegionsInCard) * NHFEtaInRegion + iEta;
-      const std::array< uint32_t, 256>& a = hfLUT->at(etaAddress);
-      calibratedET = a[hcalET] & 0x1FF;
-    }
-    towerData = calibratedET | zeroFlagMask;
-    if((hcalFB & 0x1) == 0x1) towerData |= ecalFlagMask; // LSB defines short over long fiber ratio
-    if((hcalFB & 0x2) == 0x2) towerData |= hcalFlagMask; // MSB defines minbias flag
+  uint32_t calibratedET = hcalET;
+  if(hfLUT != 0) {
+    const std::vector< uint32_t > a = hfLUT->at((region - NRegionsInCard) * NHFEtaInRegion + iEta);
+    calibratedET = a[hcalET] & 0xFF;
   }
-  else {
-    uint32_t calibratedET = hcalET;
-    if(hfLUT != nullptr) {
-      uint32_t etaAddress = (region - NRegionsInCard) * NHFEtaInRegion + iEta;
-      const std::array< uint32_t, 256>& a = hfLUT->at(etaAddress);
-      calibratedET = a[hcalET] & 0xFF;
-    }
-    uint32_t absCaloEta = abs(caloEta());
-    if(absCaloEta > 29 && absCaloEta < 40) {
-      // Divide by two (since two duplicate towers are sent)
-      calibratedET /= 2;
-    }
-    else if(absCaloEta == 40 || absCaloEta == 41) {
-      // Divide by four
-      calibratedET /= 4;
-    }
-    towerData = calibratedET | zeroFlagMask;
-    if((hcalFB & 0x1) == 0x1) towerData |= ecalFlagMask; // LSB defines short over long fiber ratio
-    if((hcalFB & 0x2) == 0x2) towerData |= hcalFlagMask; // MSB defines minbias flag
+  uint32_t absCaloEta = abs(caloEta());
+  if(absCaloEta > 29 && absCaloEta < 40) {
+    // Divide by two (since two duplicate towers are sent)
+    calibratedET /= 2;
   }
+  else if(absCaloEta == 40 || absCaloEta == 41) {
+    // Divide by four
+    calibratedET /= 4;
+  }
+  towerData = calibratedET | zeroFlagMask;
+  if((hcalFB & 0x1) == 0x1) towerData |= ecalFlagMask; // LSB defines short over long fiber ratio
+  if((hcalFB & 0x2) == 0x2) towerData |= hcalFlagMask; // MSB defines minbias flag
   return true;
 }
 
@@ -177,8 +157,7 @@ const uint16_t UCTTower::location() const {
   return l;
 }
 
-UCTTower::UCTTower(uint16_t location, int fwv) :
-  fwVersion(fwv) {
+UCTTower::UCTTower(uint16_t location) {
   if((location & 0x8000) != 0) negativeEta = true;
   crate =  (location & 0x1800) >> 11;
   card =   (location & 0x0700) >>  8;

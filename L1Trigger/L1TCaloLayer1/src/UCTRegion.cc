@@ -1,6 +1,6 @@
 #include <iostream>
-#include <cstdlib>
-#include <cstdint>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include <bitset>
 using std::bitset;
@@ -9,6 +9,7 @@ using std::string;
 
 #include "UCTRegion.hh"
 
+#include "UCTParameters.hh"
 #include "UCTGeometry.hh"
 #include "UCTLogging.hh"
 
@@ -21,10 +22,6 @@ using namespace l1tcalo;
 // (activityLevelShift, %) = (1, 50%), (2, 25%), (3, 12.5%), (4, 6.125%), (5, 3.0625%)
 // Cutting any tighter is rather dangerous
 // For the moment we use floating point arithmetic 
-
-const float activityFraction = 0.125;
-const float ecalActivityFraction = 0.25;
-const float miscActivityFraction = 0.25;
 
 bool vetoBit(bitset<4> etaPattern, bitset<4> phiPattern) {
 
@@ -69,27 +66,28 @@ uint32_t getHitTowerLocation(uint32_t *et) {
   return iAve;
 }
 
-UCTRegion::UCTRegion(uint32_t crt, uint32_t crd, bool ne, uint32_t rgn, int fwv) :
+UCTRegion::UCTRegion(uint32_t crt, uint32_t crd, bool ne, uint32_t rgn, UCTParameters *parameters) :
   crate(crt),
   card(crd),
   region(rgn),
   negativeEta(ne),
-  regionSummary(0),
-  fwVersion(fwv) {
+  uctParameters(parameters),
+  regionSummary(0)
+{
   UCTGeometry g;
   uint32_t nEta = g.getNEta(region);
   uint32_t nPhi = g.getNPhi(region);
   towers.clear();
   for(uint32_t iEta = 0; iEta < nEta; iEta++) {
     for(uint32_t iPhi = 0; iPhi < nPhi; iPhi++) {
-      towers.push_back(new UCTTower(crate, card, ne, region, iEta, iPhi, fwVersion));
+      towers.push_back(new UCTTower(crate, card, ne, region, iEta, iPhi));
     }
   }
 }
 
 UCTRegion::~UCTRegion() {
   for(uint32_t i = 0; i < towers.size(); i++) {
-    if(towers[i] != nullptr) delete towers[i];
+    if(towers[i] != 0) delete towers[i];
   }
 }
 
@@ -112,22 +110,27 @@ bool UCTRegion::process() {
   // Process towers and calculate total ET for the region
   uint32_t regionET = 0;
   uint32_t regionEcalET = 0;
+  bool doPegToMax = false;
+  bool doPegEMToMax = false;
   for(uint32_t twr = 0; twr < towers.size(); twr++) {
     if(!towers[twr]->process()) {
       LOG_ERROR << "Tower level processing failed. Bailing out :(" << std::endl;
       return false;
     }
     regionET += towers[twr]->et();
-    // Calculate regionEcalET 
-    regionEcalET += towers[twr]->getEcalET();
+    if(towers[twr]->et() == etInputMax) doPegToMax = true;
+    if(region < NRegionsInCard) {
+      regionEcalET += towers[twr]->getEcalET();
+      if(towers[twr]->getEcalET() == etInputMax) doPegEMToMax = true;
+    }
   }
-  if(regionET > RegionETMask) {
-    // Region ET can easily saturate, suppress error spam
-    // LOG_ERROR << "L1TCaloLayer1::UCTRegion::Pegging RegionET" << std::endl;
+  if(regionET > RegionETMask || doPegToMax) {
+    LOG_ERROR << "L1TCaloLayer1::UCTRegion::Pegging RegionET" << std::endl;
     regionET = RegionETMask;
   }
-  regionSummary = (RegionETMask & regionET);
-  if(regionEcalET > RegionETMask) regionEcalET = RegionETMask;
+  if(regionEcalET > RegionETMask || doPegEMToMax) regionEcalET = RegionETMask;
+
+  uint32_t hitTowerLocation = 0;
 
   // For central regions determine extra bits
 
@@ -135,7 +138,7 @@ bool UCTRegion::process() {
     // Identify active towers
     // Tower ET must be a decent fraction of RegionET
     bool activeTower[nEta][nPhi];
-    uint32_t activityLevel = ((uint32_t) ((float) regionET) * activityFraction);
+    uint32_t activityLevel = ((uint32_t) ((float) regionET) * uctParameters->activityFraction());
     uint32_t nActiveTowers = 0;
     uint32_t activeTowerET = 0;
     for(uint32_t iPhi = 0; iPhi < nPhi; iPhi++) {
@@ -168,7 +171,7 @@ bool UCTRegion::process() {
       }
     }
     uint32_t hitIPhi = getHitTowerLocation(sumETIPhi);
-    uint32_t hitTowerLocation = hitIEta * nPhi + hitIPhi;
+    hitTowerLocation = hitIEta * nPhi + hitIPhi;
     // Calculate (energy deposition) active tower pattern
     bitset<4> activeTowerEtaPattern = 0;
     for(uint32_t iEta = 0; iEta < nEta; iEta++) {
@@ -190,27 +193,61 @@ bool UCTRegion::process() {
     bool veto = vetoBit(activeTowerEtaPattern, activeTowerPhiPattern);
     bool egVeto = veto;
     bool tauVeto = veto;
-    uint32_t maxMiscActivityLevelForEG = ((uint32_t) ((float) regionET) * ecalActivityFraction);
-    uint32_t maxMiscActivityLevelForTau = ((uint32_t) ((float) regionET) * miscActivityFraction);
+    uint32_t maxMiscActivityLevelForEG = ((uint32_t) ((float) regionET) * uctParameters->ecalActivityFraction());
+    uint32_t maxMiscActivityLevelForTau = ((uint32_t) ((float) regionET) * uctParameters->miscActivityFraction());
     if((regionET - regionEcalET) > maxMiscActivityLevelForEG) egVeto = true;
     if((regionET - activeTowerET) > maxMiscActivityLevelForTau) tauVeto = true;
         
+    regionSummary = (RegionETMask & regionET);
     if(egVeto) regionSummary |= RegionEGVeto;
     if(tauVeto) regionSummary |= RegionTauVeto;
 
-    regionSummary |= (hitTowerLocation << LocationShift);
-
-    // Extra bits, not in readout, but implicit from their location in data packet for full location information
-
-    if(negativeEta) regionSummary |= NegEtaBit;  // Used top bit for +/- eta-side
-    regionSummary |= (region << RegionNoShift);  // Max region number 14, so 4 bits needed
-    regionSummary |= (card   << CardNoShift);    // Max card number is 6, so 3 bits needed
-    regionSummary |= (crate  << CrateNoShift);   // Max crate number is 2, so 2 bits needed
-
   }
 
-  return true;
+  else {
 
+    // HF Region - 8-bit ET
+
+    if(regionET <= 0xFF) 
+      regionSummary = regionET;
+    else
+      regionSummary = 0xFF;
+
+    // HF Region - hitTowerLocation will be 0-3 for caloEta = 30-39 and 0-1 for caloEta = 40-41
+    // Hit Tower Location is stored in the same bits of region Summary as for central regions for convenience
+
+    uint32_t towerETEta0 = 0;
+    uint32_t towerETEta1 = 0;
+    for(uint32_t iPhi = 0; iPhi < nPhi; iPhi++) {
+      towerETEta0 += towers[iPhi]->et();
+      towerETEta1 += towers[nPhi+iPhi]->et();
+    }
+    uint32_t hitTowerEta = 0;
+    if(towerETEta1 > towerETEta0) hitTowerEta = 1;
+    uint32_t towerETPhi0 = 0;
+    uint32_t towerETPhi1 = 0;
+    for(uint32_t iEta = 0; iEta < nEta; iEta++) {
+      for(uint32_t iPhi = 0; iPhi < nPhi/2; iPhi++) {
+	towerETPhi0 += towers[iEta*nPhi+iPhi]->et();
+	towerETPhi1 += towers[iEta*nPhi+(nPhi/2)+iPhi]->et();
+      }
+    }
+    uint32_t hitTowerPhi = 0;
+    if(towerETPhi1 > towerETPhi0) hitTowerPhi = nPhi/2;
+    hitTowerLocation = hitTowerEta*nPhi + hitTowerPhi;
+  }
+
+  regionSummary |= (hitTowerLocation << LocationShift);
+  
+  // Extra bits, not in readout, but implicit from their location in data packet for full location information
+  
+  if(negativeEta) regionSummary |= NegEtaBit;  // Used top bit for +/- eta-side
+  regionSummary |= (region << RegionNoShift);  // Max region number 14, so 4 bits needed
+  regionSummary |= (card   << CardNoShift);    // Max card number is 6, so 3 bits needed
+  regionSummary |= (crate  << CrateNoShift);   // Max crate number is 2, so 2 bits needed
+  
+  return true;
+  
 }
 
 bool UCTRegion::clearEvent() {

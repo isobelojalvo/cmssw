@@ -5,12 +5,13 @@
 
 #include "UCTGeometry.hh"
 
+class UCTParameters;
 class UCTCard;
 
 class UCTCrate {
 public:
 
-  UCTCrate(uint32_t crt, int fwv);
+  UCTCrate(uint32_t crt, UCTParameters *p);
 
   virtual ~UCTCrate();
 
@@ -61,7 +62,6 @@ private:
   std::vector<UCTCard*> cards;
   uint32_t crateSummary;
 
-  const int fwVersion;
 };
 
 #endif

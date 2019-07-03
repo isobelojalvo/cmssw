@@ -3,7 +3,7 @@
 
 #include "UCTGeometry.hh"
 
-#include <array>
+#include <vector>
 
 namespace l1tcalo {
   constexpr uint32_t etInputMax{0xFF};
@@ -31,7 +31,7 @@ class UCTLayer1;
 class UCTTower {
 public:
 
-  UCTTower(uint32_t crt, uint32_t crd, bool ne, uint32_t rgn, uint32_t eta, uint32_t phi, int fwv) :
+  UCTTower(uint32_t crt, uint32_t crd, bool ne, uint32_t rgn, uint32_t eta, uint32_t phi) :
     crate(crt),
     card(crd),
     region(rgn),
@@ -42,14 +42,13 @@ public:
     ecalET(0),
     hcalET(0),
     hcalFB(0),
-    ecalLUT(nullptr),
-    hcalLUT(nullptr),
-    hfLUT(nullptr),
-    towerData(0),
-    fwVersion(fwv)
+    ecalLUT(0),
+    hcalLUT(0),
+    hfLUT(0),
+    towerData(0)
   {}
 
-  UCTTower(uint16_t location, int fwv);
+  UCTTower(uint16_t location);
   
   virtual ~UCTTower() {;}
 
@@ -66,17 +65,17 @@ public:
   bool setHCALData(uint32_t hcalFB, uint32_t hcalET);
   bool setHFData(uint32_t fbIn, uint32_t etIn);
 
-  bool setECALLUT(const std::array< std::array< std::array<uint32_t, 256>, 2>, 28> *l) {
+  bool setECALLUT(const std::vector< std::vector< std::vector< uint32_t > > > *l) {
     ecalLUT = l;
     return true;
   }
   
-  bool setHCALLUT(const std::array< std::array< std::array<uint32_t, 256>, 2>, 28> *l) {
+  bool setHCALLUT(const std::vector< std::vector< std::vector< uint32_t > > > *l) {
     hcalLUT = l;
     return true;
   }
   
-  bool setHFLUT(const std::array< std::array<uint32_t, 256>, 12>  *l) {
+  bool setHFLUT(const std::vector< std::vector< uint32_t > > *l) {
     hfLUT = l;
     return true;
   }
@@ -135,15 +134,15 @@ private:
 
   // No default constructor is needed
 
-  UCTTower() = delete;
+  UCTTower();
 
   // No copy constructor is needed
 
-  UCTTower(const UCTTower&) = delete;
+  UCTTower(const UCTTower&);
 
   // No equality operator is needed
 
-  const UCTTower& operator=(const UCTTower&) = delete;
+  const UCTTower& operator=(const UCTTower&);
 
   // Tower location definition
 
@@ -162,19 +161,16 @@ private:
   uint32_t hcalFB;
 
   // Lookup table
-  // ecal/hcal:  256 pt bins, 2 sides, 28 eta bins (towers)
-  // hf:  256 pt bins, 12 eta bins (towers)
-  const std::array< std::array< std::array<uint32_t, 256>, 2>, 28> *ecalLUT;
-  const std::array< std::array< std::array<uint32_t, 256>, 2>, 28> *hcalLUT;
-  const std::array< std::array<uint32_t, 256>, 12> *hfLUT;
+
+  const std::vector< std::vector< std::vector< uint32_t > > > *ecalLUT;
+  const std::vector< std::vector< std::vector< uint32_t > > > *hcalLUT;
+  const std::vector< std::vector< uint32_t > > *hfLUT;
   
   // Owned tower level data 
   // Packed bits -- only bottom 16 bits are used in "prelim" protocol
 
   uint32_t towerData;
 
-  // Keep track of possible algorithm changes
-  const int fwVersion;
 };
 
 #endif

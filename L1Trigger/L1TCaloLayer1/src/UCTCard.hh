@@ -5,12 +5,13 @@
 
 #include "UCTGeometry.hh"
 
+class UCTParameters;
 class UCTRegion;
 
 class UCTCard {
 public:
 
-  UCTCard(uint32_t crt, uint32_t crd, int fwv);
+  UCTCard(uint32_t crt, uint32_t crd, UCTParameters *p);
 
   virtual ~UCTCard();
 
@@ -63,7 +64,6 @@ private:
 
   uint32_t cardSummary;
 
-  const int fwVersion;
 };
 
 #endif

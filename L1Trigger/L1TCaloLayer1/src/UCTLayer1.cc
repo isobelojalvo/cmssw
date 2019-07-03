@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
-#include <cstdlib>
-#include <cstdint>
+#include <stdlib.h>
+#include <stdint.h>
 
 #include "UCTLayer1.hh"
 
@@ -10,42 +10,45 @@
 #include "UCTRegion.hh"
 #include "UCTTower.hh"
 
+#include "UCTParameters.hh"
 #include "UCTGeometry.hh"
 #include "UCTLogging.hh"
 
 using namespace l1tcalo;
 
-UCTLayer1::UCTLayer1(int fwv) : uctSummary(0), fwVersion(fwv) {
+UCTLayer1::UCTLayer1(UCTParameters *p) : parameters(p), uctSummary(0) 
+{
+  if(parameters == nullptr) parameters = new UCTParameters();
   UCTGeometry g;
   crates.reserve(g.getNCrates());
   for(uint32_t crate = 0; crate < g.getNCrates(); crate++) {
-    crates.push_back(new UCTCrate(crate, fwVersion));
+    crates.push_back(new UCTCrate(crate, parameters));
   }
 }
 
 UCTLayer1::~UCTLayer1() {
   for(uint32_t i = 0; i < crates.size(); i++) {
-    if(crates[i] != nullptr) delete crates[i];
+    if(crates[i] != 0) delete crates[i];
   }
 }
 
 bool UCTLayer1::clearEvent() {
   for(uint32_t i = 0; i < crates.size(); i++) {
-    if(crates[i] != nullptr) crates[i]->clearEvent();
+    if(crates[i] != 0) crates[i]->clearEvent();
   }
   return true;
 }
 
 const UCTRegion* UCTLayer1::getRegion(int regionEtaIndex, uint32_t regionPhiIndex) const {
-  if(regionEtaIndex == 0 || (uint32_t) std::abs(regionEtaIndex) > NRegionsInCard || regionPhiIndex >= MaxUCTRegionsPhi) {
-    return nullptr;
+  if(regionEtaIndex == 0 || (uint32_t) std::abs(regionEtaIndex) > (NRegionsInCard + NHFRegionsInCard) || regionPhiIndex >= MaxUCTRegionsPhi) {
+    return 0;
   }
   // Get (0,0) tower region information
   UCTGeometry g;
   UCTRegionIndex r = UCTRegionIndex(regionEtaIndex, regionPhiIndex);
   UCTTowerIndex t = g.getUCTTowerIndex(r);
-  uint32_t absCaloEta = std::abs(t.first);
-  uint32_t absCaloPhi = std::abs(t.second);
+  uint32_t absCaloEta = abs(t.first);
+  uint32_t absCaloPhi = abs(t.second);
   uint32_t crt = g.getCrate(absCaloEta, absCaloPhi);
   if(crt >= crates.size()) {
     LOG_ERROR << "UCTLayer1::getRegion - Crate number is wrong - " << std::hex << crt 
@@ -74,8 +77,8 @@ const UCTTower* UCTLayer1::getTower(int caloEta, int caloPhi) const {
 }
 
 bool UCTLayer1::setECALData(UCTTowerIndex t, bool ecalFG, uint32_t ecalET) {
-  uint32_t absCaloEta = std::abs(t.first);
-  uint32_t absCaloPhi = std::abs(t.second);
+  uint32_t absCaloEta = abs(t.first);
+  uint32_t absCaloPhi = abs(t.second);
   UCTGeometry g;
   uint32_t crt = g.getCrate(absCaloEta, absCaloPhi);
   if(crt >= crates.size()) {
@@ -88,8 +91,8 @@ bool UCTLayer1::setECALData(UCTTowerIndex t, bool ecalFG, uint32_t ecalET) {
 }
 
 bool UCTLayer1::setHCALData(UCTTowerIndex t, uint32_t hcalFB, uint32_t hcalET) {
-  uint32_t absCaloEta = std::abs(t.first);
-  uint32_t absCaloPhi = std::abs(t.second);
+  uint32_t absCaloEta = abs(t.first);
+  uint32_t absCaloPhi = abs(t.second);
   UCTGeometry g;
   uint32_t crt = g.getCrate(absCaloEta, absCaloPhi);
   if(crt >= crates.size()) {
@@ -104,7 +107,7 @@ bool UCTLayer1::setHCALData(UCTTowerIndex t, uint32_t hcalFB, uint32_t hcalET) {
 bool UCTLayer1::process() {
   uctSummary = 0;
   for(uint32_t i = 0; i < crates.size(); i++) {
-    if(crates[i] != nullptr) {
+    if(crates[i] != 0) {
       crates[i]->process();
       uctSummary += crates[i]->et();
     }

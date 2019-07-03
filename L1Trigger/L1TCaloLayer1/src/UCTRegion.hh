@@ -6,6 +6,8 @@
 
 #include "UCTTower.hh"
 
+class UCTParameters;
+
 namespace l1tcalo {
   constexpr uint32_t RegionETMask { 0x000003FF};
   constexpr uint32_t RegionEGVeto { 0x00000400};
@@ -25,7 +27,7 @@ namespace l1tcalo {
 class UCTRegion {
 public:
 
-  UCTRegion(uint32_t crt, uint32_t crd, bool ne, uint32_t rgn, int fwv);
+  UCTRegion(uint32_t crt, uint32_t crd, bool ne, uint32_t rgn, UCTParameters *parameters);
 
   virtual ~UCTRegion();
 
@@ -86,6 +88,8 @@ public:
   }
 
   friend std::ostream& operator<<(std::ostream&, const UCTRegion&);
+
+  UCTRegion(const UCTRegion&);
   
 private:
 
@@ -93,9 +97,6 @@ private:
 
   UCTRegion();
 
-  // No copy constructor is needed
-
-  UCTRegion(const UCTRegion&);
 
   // No equality operator is needed
 
@@ -114,13 +115,16 @@ protected:
   uint32_t region;
   bool negativeEta;
 
+  // UCT parameters
+
+  UCTParameters *uctParameters;
+
   // Owned region level data 
 
   std::vector<UCTTower*> towers;
 
   uint32_t regionSummary;
 
-  const int fwVersion;
 };
 
 #endif

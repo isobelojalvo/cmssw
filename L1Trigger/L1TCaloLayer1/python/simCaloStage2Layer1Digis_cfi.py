@@ -17,9 +17,7 @@ simCaloStage2Layer1Digis = cms.EDProducer(
     verbose = cms.bool(False),
     unpackEcalMask = cms.bool(False),
     unpackHcalMask = cms.bool(False),
-    # See UCTLayer1.hh for firmware version
-    firmwareVersion = cms.int32(1),
+    activityFraction = cms.double(0.125),
+    ecalActivityFraction = cms.double(0.25),
+    miscActivityFraction = cms.double(0.25)
     )
-
-from Configuration.Eras.Modifier_stage2L1Trigger_2017_cff import stage2L1Trigger_2017
-stage2L1Trigger_2017.toModify( simCaloStage2Layer1Digis, firmwareVersion = cms.int32(3) )
