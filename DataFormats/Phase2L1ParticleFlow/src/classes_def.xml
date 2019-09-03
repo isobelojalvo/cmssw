@@ -16,7 +16,7 @@
   <class name="edm::Ref<l1t::PFTrackCollection>" />
 
   <class name="l1t::PFCandidate"  ClassVersion="3">
-        <version ClassVersion="3" checksum="4253860178"/>
+        <version ClassVersion="3" checksum="3620598568"/>
   </class>
   <class name="l1t::PFCandidateCollection" />
   <class name="edm::Wrapper<l1t::PFCandidateCollection>" />

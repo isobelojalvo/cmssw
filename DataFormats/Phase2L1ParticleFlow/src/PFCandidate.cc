@@ -1,6 +1,6 @@
 #include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidate.h"
 
-l1t::PFCandidate::PFCandidate(Kind kind, int charge, const PolarLorentzVector & p, float puppiWeight, int hwpt, int hweta, int hwphi) :
+l1t::PFCandidate::PFCandidate(Kind kind, int charge, const PolarLorentzVector & p, float puppiWeight, int hwpt, int hweta, int hwphi, float time) :
         L1Candidate(p, hwpt, hweta, hwphi, /*hwQuality=*/int(kind)),
         puppiWeight_(puppiWeight) {
     setCharge(charge);
