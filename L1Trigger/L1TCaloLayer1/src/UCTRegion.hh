@@ -6,6 +6,9 @@
 
 #include "UCTTower.hh"
 
+#include <bitset>
+using std::bitset;
+
 class UCTParameters;
 
 namespace l1tcalo {
@@ -41,6 +44,21 @@ public:
   bool setECALData(UCTTowerIndex t, bool ecalFG, uint32_t ecalET);
   bool setHCALData(UCTTowerIndex t, uint32_t hcalFB, uint32_t hcalET);
   bool process();
+
+  bool setActiveTowerEta(bitset<4> activeTowerEta_in){
+    activeTowerEta_m = activeTowerEta_in;
+    return true;
+  }
+  bool setActiveTowerPhi(bitset<4> activeTowerPhi_in){
+    activeTowerPhi_m = activeTowerPhi_in;
+    return true;
+  }
+  const bitset<4> activeTowerEta() const {
+    return activeTowerEta_m;
+  }
+  const bitset<4> activeTowerPhi() const {
+    return activeTowerPhi_m;
+  }
 
   // Packed data access
 
@@ -124,6 +142,9 @@ protected:
   std::vector<UCTTower*> towers;
 
   uint32_t regionSummary;
+
+  bitset<4> activeTowerEta_m;
+  bitset<4> activeTowerPhi_m;
 
 };
 

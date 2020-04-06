@@ -172,6 +172,7 @@ bool UCTRegion::process() {
     }
     uint32_t hitIPhi = getHitTowerLocation(sumETIPhi);
     hitTowerLocation = hitIEta * nPhi + hitIPhi;
+
     // Calculate (energy deposition) active tower pattern
     bitset<4> activeTowerEtaPattern = 0;
     for(uint32_t iEta = 0; iEta < nEta; iEta++) {
@@ -181,6 +182,8 @@ bool UCTRegion::process() {
       }
       if(activeStrip) activeTowerEtaPattern |= (0x1 << iEta);
     }
+    setActiveTowerEta(activeTowerEtaPattern);
+    
     bitset<4> activeTowerPhiPattern = 0;
     for(uint32_t iPhi = 0; iPhi < nPhi; iPhi++) {
       bool activeStrip = false;
@@ -189,6 +192,7 @@ bool UCTRegion::process() {
       }
       if(activeStrip) activeTowerPhiPattern |= (0x1 << iPhi);
     }
+    setActiveTowerPhi(activeTowerPhiPattern);
     // Calculate veto bits for eg and tau patterns
     bool veto = vetoBit(activeTowerEtaPattern, activeTowerPhiPattern);
     bool egVeto = veto;
